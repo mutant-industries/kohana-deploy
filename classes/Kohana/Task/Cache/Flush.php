@@ -7,6 +7,7 @@
  * @author Mutant Industries ltd. <mutant-industries@hotmail.com>
  */
 class Kohana_Task_Cache_Flush extends Deploy_Task {
+
     use Rollback;
 
     /**
@@ -15,8 +16,7 @@ class Kohana_Task_Cache_Flush extends Deploy_Task {
      *
      * @var array
      */
-    protected $_options = array
-    (
+    protected $_options = array(
         'cache_type' => null,
         'tags' => null,
     );
@@ -25,12 +25,11 @@ class Kohana_Task_Cache_Flush extends Deploy_Task {
     {
         $cache = Cache::instance($params['cache_type']);
 
-        if( ! empty($params['tags']))
+        if ( ! empty($params['tags']))
         {
-            if( ! $cache instanceof Cache_Tagging)
+            if ( ! ($cache instanceof Cache_Tagging))
             {
-                throw new Cache_Exception('Unable to flush by tags, :driver doesn\'t support tagging !',
-                        array(':driver' => $params['cache_type']));
+                throw new Cache_Exception('Unable to flush by tags, :driver doesn\'t support tagging !', array(':driver' => $params['cache_type']));
             }
 
             foreach (explode(',', $params['tags']) as $tag)
@@ -62,11 +61,11 @@ class Kohana_Task_Cache_Flush extends Deploy_Task {
     public function build_validation(Validation $validation)
     {
         return parent::build_validation($validation)
-            ->rule('cache_type', 'not_empty')
-            ->rule('cache_type', function($type) {
-                return Kohana::$config->load('cache')->offsetExists($type);
-            })
-            ->rule('tags', 'regex', array(':value', '/^\w+(,\w+)*$/'));
+                        ->rule('cache_type', 'not_empty')
+                        ->rule('cache_type', function($type) {
+                            return Kohana::$config->load('cache')->offsetExists($type);
+                        })
+                        ->rule('tags', 'regex', array(':value', '/^\w+(,\w+)*$/'));
     }
 
 }

@@ -25,11 +25,11 @@ abstract class Kohana_Suspend {
      */
     public static function instance()
     {
-        if(Suspend::$_instance === null)
+        if (Suspend::$_instance === null)
         {
             $config = Kohana::$config->load('suspend');
 
-            $handler_class = 'Suspend_'.  ucfirst($config->handler);
+            $handler_class = 'Suspend_'.ucfirst($config->handler);
 
             Suspend::$_instance = new $handler_class($config);
         }
@@ -38,7 +38,7 @@ abstract class Kohana_Suspend {
     }
 
     /**
-     * Mark application as temporarily unavaliable
+     * Mark application as temporarily unavailable
      */
     abstract public function mark_suspended();
 

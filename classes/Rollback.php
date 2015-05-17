@@ -15,9 +15,9 @@ trait Rollback {
     {
         $options = $this->get_options();
 
-        if(isset($options['rollback']))
+        if (isset($options['rollback']))
         {
-            if( ! Valid::date($options['rollback']))
+            if ( ! Valid::date($options['rollback']))
             {
                 throw new Rollback_Exception('invalid rollback timestamp given');
             }
@@ -35,15 +35,15 @@ trait Rollback {
      * @param type $option
      * @return void
      */
-	public function valid_option(Validation $validation, $option)
-	{
-        if($option === 'rollback')
+    public function valid_option(Validation $validation, $option)
+    {
+        if ($option === 'rollback')
         {
             return;
         }
 
         parent::valid_option($validation, $option);
-	}
+    }
 
     abstract protected function _rollback(array $params);
 

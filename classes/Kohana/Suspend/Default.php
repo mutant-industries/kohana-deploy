@@ -33,7 +33,7 @@ class Kohana_Suspend_Default extends Suspend {
     public function mark_suspended()
     {
         // redundant security check
-        if(PHP_SAPI !== 'cli')
+        if (PHP_SAPI !== 'cli')
         {
             throw new HTTP_Exception_403;
         }

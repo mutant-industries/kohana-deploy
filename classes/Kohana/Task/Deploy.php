@@ -15,6 +15,7 @@
  * @author Mutant Industries ltd. <mutant-industries@hotmail.com>
  */
 class Kohana_Task_Deploy extends Deploy_Task {
+
     use Rollback;
 
     protected $_config_name = 'deploy';
@@ -49,7 +50,7 @@ class Kohana_Task_Deploy extends Deploy_Task {
             {
                 foreach (array_reverse($this->_actions_applied, true) as $task)
                 {
-                    if( ! Deploy_Task::is_rollback_supported($task)) continue;
+                    if ( ! Deploy_Task::is_rollback_supported($task)) continue;
 
                     try
                     {
@@ -57,8 +58,7 @@ class Kohana_Task_Deploy extends Deploy_Task {
                     }
                     catch (Exception $e)
                     {
-                        Log::instance()->add(Log::WARNING, 'task :task failed to rollback to current state', array(':task' => $task),
-                                array('exception' => $e));
+                        Log::instance()->add(Log::WARNING, 'task :task failed to rollback to current state', array(':task' => $task), array('exception' => $e));
                     }
                 }
 
@@ -81,7 +81,7 @@ class Kohana_Task_Deploy extends Deploy_Task {
         {
             $_task = $this->_create_task($task, $options);
 
-            if( ! Deploy_Task::is_rollback_supported($_task)) continue;
+            if ( ! Deploy_Task::is_rollback_supported($_task)) continue;
 
             try
             {
@@ -89,8 +89,7 @@ class Kohana_Task_Deploy extends Deploy_Task {
             }
             catch (Exception $e)
             {
-                Log::instance()->add(Log::WARNING, 'task :task failed to rollback to :time: '.$e->getMessage(),
-                        array(':task' => $task, ':time' => $params['rollback']), array('exception' => $e));
+                Log::instance()->add(Log::WARNING, 'task :task failed to rollback to :time: ' . $e->getMessage(), array(':task' => $task, ':time' => $params['rollback']), array('exception' => $e));
             }
         }
 
@@ -126,8 +125,7 @@ class Kohana_Task_Deploy extends Deploy_Task {
             }
             catch (Exception $e)
             {
-                Log::instance()->add(Log::WARNING, 'task :task failed to run: '.$e->getMessage(),
-                        array(':task' => $task), array('exception' => $e));
+                Log::instance()->add(Log::WARNING, 'task :task failed to run: ' . $e->getMessage(), array(':task' => $task), array('exception' => $e));
             }
         }
 
@@ -142,8 +140,8 @@ class Kohana_Task_Deploy extends Deploy_Task {
      * @return boolean
      */
     public function valid_option(Validation $validation, $option)
-	{
+    {
 
-	}
+    }
 
 }

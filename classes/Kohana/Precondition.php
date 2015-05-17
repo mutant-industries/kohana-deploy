@@ -55,8 +55,8 @@ class Kohana_Precondition {
      * @throws Precondition_Exception if precondition handler is not callable
      */
     public function __construct(array $options)
-	{
-		if( ! isset($options['handler']) || ! is_callable($options['handler']))
+    {
+        if ( ! isset($options['handler']) || ! is_callable($options['handler']))
         {
             throw new Precondition_Exception('Precondition handler not set or not callable !');
         }
@@ -65,15 +65,15 @@ class Kohana_Precondition {
         $this->_expected = isset($options['expected']) ? $options['expected'] : true;
 
         $this->_handler = $options['handler'];
-	}
+    }
 
     /**
      * @return boolean
      */
-	public function check()
-	{
+    public function check()
+    {
         return call_user_func($this->_handler) === $this->_expected;
-	}
+    }
 
     public function on_fail()
     {

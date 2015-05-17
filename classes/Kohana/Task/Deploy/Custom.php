@@ -15,8 +15,7 @@
  */
 class Kohana_Task_Deploy_Custom extends Deploy_Database {
 
-    protected $_options = array
-    (
+    protected $_options = array(
         'php_changelog_dir' => null,
     );
 
@@ -29,7 +28,7 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
     {
         parent::__construct();
 
-        foreach(ORM::factory('Changelog')->find_all() as $record)
+        foreach (ORM::factory('Changelog')->find_all() as $record)
         {
             $this->_actions_executed[$record->hash()] = $record;
         }
@@ -46,14 +45,14 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
         $start_time = date(DATE_ATOM);
         $list = Kohana::list_files($params['php_changelog_dir']);
 
-        if( ! count($list))
+        if ( ! count($list))
         {
             throw new Deploy_Exception('No custom changelogs to be applied !');
         }
 
         foreach ($list as $changelog_file)
         {
-            foreach(Kohana::load($changelog_file) as $changeset)
+            foreach (Kohana::load($changelog_file) as $changeset)
             {
                 try
                 {
@@ -87,14 +86,14 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
     {
         $list = Kohana::list_files($params['php_changelog_dir']);
 
-        if( ! count($list))
+        if ( ! count($list))
         {
             throw new Rollback_Exception('no custom changelogs found !');
         }
 
         foreach (ORM::factory('Changelog')->executed_since($params['rollback'])->find_all() as $rollback_record)
         {
-            if(($changeset = $this->_find_changeset_by_record($rollback_record, $list)) === null)
+            if (($changeset = $this->_find_changeset_by_record($rollback_record, $list)) === null)
             {
                 continue;
             }
@@ -114,9 +113,9 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
      */
     protected function _apply_changeset(array $changeset, $changelog_file)
     {
-        if( ! isset($changeset['id']) || ! isset($changeset['author']) || ! isset($changeset['changes']))
+        if ( ! isset($changeset['id']) || ! isset($changeset['author']) || ! isset($changeset['changes']))
         {
-            throw new Deploy_Exception($changelog_file.' contains invalid changeset: id, author or changes not set !');
+            throw new Deploy_Exception($changelog_file . ' contains invalid changeset: id, author or changes not set !');
         }
 
         $record = ORM::factory('Changelog');
@@ -127,7 +126,7 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
                 ->filename($changelog_file);
 
         // already executed
-        if(array_key_exists($record->hash(), $this->_actions_executed))
+        if (array_key_exists($record->hash(), $this->_actions_executed))
         {
             return;
         }
@@ -137,11 +136,11 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
         $skip = false;
 
         // ---------------- callback init ----------------
-        if(is_callable($changeset['changes']))
+        if (is_callable($changeset['changes']))
         {
             $callback = $changeset['changes'];
         }
-        else if(is_string($changeset['changes']))
+        else if (is_string($changeset['changes']))
         {
             try
             {
@@ -152,38 +151,38 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
                 throw new Deploy_Exception('Invalid task :task', array(':task' => $changeset['changes']), 0, $e);
             }
         }
-        if($changeset['changes'] instanceof Minion_Task)
+        if ($changeset['changes'] instanceof Minion_Task)
         {
             $callback = array($changeset['changes'], 'execute');
         }
 
-        if($callback === null)
+        if ($callback === null)
         {
             throw new Deploy_Exception($changeset['changes'].' not callable !');
         }
 
         // ---------------- precondition check ----------------
-        if(isset($changeset['precondition']))
+        if (isset($changeset['precondition']))
         {
             $precondition = $changeset['precondition'];
 
-            if( ! $precondition instanceof Precondition)
+            if ( ! $precondition instanceof Precondition)
             {
                 throw new Deploy_Exception($changelog_file.': '.$changeset['id'].' '.$changeset['author'].' contains invalid precondition !');
             }
-            if( ! $precondition->check())
+            if ( ! $precondition->check())
             {
                 $error = $changelog_file.': '.$changeset['id'].' '.$changeset['author'].' unsatisfied precondition !';
 
-                if($precondition->on_fail() === Precondition::HALT)
+                if ($precondition->on_fail() === Precondition::HALT)
                 {
                     throw new Deploy_Exception($error);
                 }
-                else if($precondition->on_fail() === Precondition::WARN)
+                else if ($precondition->on_fail() === Precondition::WARN)
                 {
                     Log::instance()->add(Log::WARNING, $error);
                 }
-                else if($precondition->on_fail() === Precondition::MARK_RAN)
+                else if ($precondition->on_fail() === Precondition::MARK_RAN)
                 {
                     $skip = true;
                 }
@@ -212,7 +211,7 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
     protected function _rollback_changeset(array $changeset)
     {
         // ------------- unimportant stuff, shouldn't happen -------------------
-        if( ! isset($changeset['id']) || ! isset($changeset['author']) || ! isset($changeset['changes']))
+        if ( ! isset($changeset['id']) || ! isset($changeset['author']) || ! isset($changeset['changes']))
         {
             throw new Rollback_Exception('invalid changeset to be rolled back: id, author or changes not set !');
         }
@@ -221,14 +220,14 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
         $callback = null;
         $parameters = isset($changeset['parameters']) ? $changeset['parameters'] : array();
 
-        if(isset($changeset['rollback']))
+        if (isset($changeset['rollback']))
         {
-            if(is_callable($changeset['rollback']))
+            if (is_callable($changeset['rollback']))
             {
                 $callback = $changeset['rollback'];
             }
         }
-        else if(is_string($changeset['changes']))   // autorollback where supported
+        else if (is_string($changeset['changes']))   // autorollback where supported
         {
             try
             {
@@ -238,7 +237,8 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
             {
                 throw new Rollback_Exception('Invalid task :task', array(':task' => $changeset['changes']), null, $e);
             }
-            if( ! Deploy_Task::is_rollback_supported($task))
+
+            if ( ! Deploy_Task::is_rollback_supported($task))
             {
                 throw new Rollback_Exception('Rollback not possible for task :task', array(':task' => $changeset['changes']));
             }
@@ -246,7 +246,7 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
             $callback = array($task, 'execute');
         }
 
-        if($callback === null)
+        if ($callback === null)
         {
             throw new Rollback_Exception($changeset['id'].' '.$changeset['author'].' rollback not supported');
         }
@@ -276,7 +276,7 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
                 $changeset_record->author($changeset['author']);
                 $changeset_record->filename($changelog_file);
 
-                if($changeset_record->hash() === $record->hash())
+                if ($changeset_record->hash() === $record->hash())
                 {
                     return $changeset;
                 }
@@ -293,7 +293,7 @@ class Kohana_Task_Deploy_Custom extends Deploy_Database {
     public function build_validation(Validation $validation)
     {
         return parent::build_validation($validation)
-            ->rule('php_changelog_dir', 'not_empty');
+                        ->rule('php_changelog_dir', 'not_empty');
     }
 
 }

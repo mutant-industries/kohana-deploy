@@ -14,30 +14,28 @@
 class Kohana_Task_Deploy_Liquibase extends Deploy_Database {
 
     /**
-     * changelog_dir - all files in this directory will be included in generated master
+     * db_changelog_dir - all files in this directory will be included in generated master
      *  changelog, format support: xml, json, yaml
      * execute_module_changelogs - modules changelog location - MODPATH.'module_name/db/changelog.xml'
      * log_level - liquibase log level
      *
      * @var array
      */
-    protected $_options = array
-    (
-        'changelog_dir' => null,
+    protected $_options = array(
+        'db_changelog_dir' => null,
         'execute_module_changelogs' => 'false',
         'log_level' => 'info',
+        'command' => 'liquibase',
     );
 
     protected function _execute(array $params)
     {
-        return $this->_execute_liquibase($this->_generate_master_changelog($params),
-                'update', $params['log_level']);
+        return $this->_execute_liquibase($this->_generate_master_changelog($params), 'update');
     }
 
     protected function _rollback(array $params)
     {
-        return $this->_execute_liquibase($this->_generate_master_changelog($params),
-                'rollbackToDate '.date("Y-m-d\TH:i:s", strtotime($params['rollback'])), $params['log_level']);
+        return $this->_execute_liquibase($this->_generate_master_changelog($params), 'rollbackToDate '.date("Y-m-d\TH:i:s", strtotime($params['rollback'])));
     }
 
     /**
@@ -45,18 +43,17 @@ class Kohana_Task_Deploy_Liquibase extends Deploy_Database {
      *
      * @param string $changelog master changelog realpath
      * @param string $_command
-     * @param string $log_level debug|info|warning|severe|off
      * @return liquibase output
      * @throws Liquibase_Exception
      */
-    protected function _execute_liquibase($changelog, $_command, $log_level)
+    protected function _execute_liquibase($changelog, $_command)
     {
         $connection = $this->_db_config['connection'];
 
         // ------- generate shell command -----------
-        $command = 'liquibase --changeLogFile='.$changelog.' --url=jdbc:';
+        $command = $this->_options['command'].' --changeLogFile='.$changelog.' --url=jdbc:';
 
-        if(isset($connection['dsn']))   // PDO
+        if (isset($connection['dsn']))   // PDO
         {
             $command.= $connection['dsn'];
         }
@@ -64,22 +61,22 @@ class Kohana_Task_Deploy_Liquibase extends Deploy_Database {
         {
             $command.= strtolower($this->_db_config['type']).'://'.$connection['hostname'];
 
-            if(isset($connection['database']))
+            if (isset($connection['database']))
             {
                 $command.= '/'.$connection['database'];
             }
         }
 
-        if( ! empty($connection['username']))
+        if ( ! empty($connection['username']))
         {
             $command.= ' --username='.$connection['username'];
         }
-        if( ! empty($connection['password']))
+        if ( ! empty($connection['password']))
         {
             $command.= ' --password='.$connection['password'];
         }
 
-        $command.= ' --logLevel='.$log_level.' '.$_command;
+        $command.= ' --logLevel='.$this->_options['log_level'].' '.$_command;
 //        Log::instance()->add(Log::DEBUG, 'Executing command: '.$command);
         // ---------------------------------------------------------------------
 
@@ -88,15 +85,15 @@ class Kohana_Task_Deploy_Liquibase extends Deploy_Database {
         $p = proc_open($command, array(
             1 => array("pipe", "w"),
             2 => array("pipe", "w") // liquibase likes to write to stderr very much
-         ), $pipes);
+                ), $pipes);
 
         $output = stream_get_contents($pipes[2]);
-        array_map('fclose',$pipes);
+        array_map('fclose', $pipes);
         $retval = proc_close($p);
         // delete generated changelog
         unlink($changelog);
 
-        if($retval !== 0)
+        if ($retval !== 0)
         {
             throw new Liquibase_Exception($output);
         }
@@ -111,9 +108,9 @@ class Kohana_Task_Deploy_Liquibase extends Deploy_Database {
      * @return string
      * @throws Liquibase_Exception
      */
-    protected function _generate_master_changelog(array $params) {
-
-        if( ! count($list = $this->_source_files($params)))
+    protected function _generate_master_changelog(array $params)
+    {
+        if ( ! count($list = $this->_source_files($params)))
         {
             throw new Liquibase_Exception('No liquibase changelogs to be applied !');
         }
@@ -124,7 +121,7 @@ class Kohana_Task_Deploy_Liquibase extends Deploy_Database {
         {
             $changelog['databaseChangeLog'][] = array(
                 'include' => array('file' => $one_changelog_filename)
-                );
+            );
         }
 
         $file = fopen(sys_get_temp_dir().DIRECTORY_SEPARATOR.microtime(true).'.json', 'w');
@@ -140,14 +137,13 @@ class Kohana_Task_Deploy_Liquibase extends Deploy_Database {
         $list = array();
 
         // modules go first
-        if($params['execute_module_changelogs'] === 'true'
-                && $module_changelogs = Kohana::find_file('db', 'changelog', 'xml', true))
+        if ($params['execute_module_changelogs'] === 'true' && $module_changelogs = Kohana::find_file('db', 'changelog', 'xml', true))
         {
             $list = Arr::merge($list, $module_changelogs);
         }
-        if(isset($params['changelog_dir']))
+        if (isset($params['db_changelog_dir']))
         {
-            $list = Arr::merge($list, Kohana::list_files($params['changelog_dir']));
+            $list = Arr::merge($list, Kohana::list_files($params['db_changelog_dir']));
         }
 
         return $list;
@@ -156,9 +152,10 @@ class Kohana_Task_Deploy_Liquibase extends Deploy_Database {
     public function build_validation(Validation $validation)
     {
         return parent::build_validation($validation)
-            ->rule('execute_module_changelogs', 'regex', array(':value', '/true|false/'))
-            ->rule('log_level', 'regex', array(':value', '/debug|info|warning|severe|off/'))
-            ->rule('changelog_dir', 'not_empty');
+                        ->rule('execute_module_changelogs', 'regex', array(':value', '/true|false/'))
+                        ->rule('log_level', 'regex', array(':value', '/debug|info|warning|severe|off/'))
+                        ->rule('db_changelog_dir', 'not_empty')
+                        ->rule('command', 'not_empty');
     }
 
 }

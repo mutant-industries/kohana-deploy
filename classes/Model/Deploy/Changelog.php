@@ -39,8 +39,8 @@ class Model_Deploy_Changelog extends ORM {
     public function save(\Validation $validation = NULL)
     {
         $last_executed = DB::select(
-            array(DB::expr('max(orderexecuted)'), 'last_executed')
-        )->from($this->_table_name)->execute();
+                        array(DB::expr('max(orderexecuted)'), 'last_executed')
+                )->from($this->_table_name)->execute();
 
         // liquibase compatible
         $this->dateexecuted($this->_db instanceof Database_SQLite ? gmdate('Y-m-d H:i:s') : Db::expr('now()'))
@@ -60,8 +60,7 @@ class Model_Deploy_Changelog extends ORM {
      */
     protected function _build($type)
     {
-        $this->where(call_user_func($this->_column_name_modifier, 'description'), '=',
-                Model_Changelog::RECORD_IDENTIFIER);
+        $this->where(call_user_func($this->_column_name_modifier, 'description'), '=', Model_Changelog::RECORD_IDENTIFIER);
 
         return parent::_build($type);
     }
@@ -82,7 +81,7 @@ class Model_Deploy_Changelog extends ORM {
     {
         $attribute = call_user_func($this->_column_name_modifier, $name);
 
-        if( ! isset($arguments[0]))
+        if ( ! isset($arguments[0]))
         {
             return $this->$attribute;
         }
@@ -96,7 +95,7 @@ class Model_Deploy_Changelog extends ORM {
     {
         $this->_db = Database::instance();
 
-        if($this->_db instanceof Database_PostgreSQL)
+        if ($this->_db instanceof Database_PostgreSQL)
         {
             $this->_column_name_modifier = 'strtolower';
         }

@@ -11,9 +11,10 @@ return array(
          * Custom (unsorted) changelog set is always executed first.
          */
         'deploy:liquibase' => array(
-            'changelog_dir' => 'db/liquibase',
-            'execute_module_changelogs' => 'true',  // execute everything in MODPATH.'module_name/db'
-            'log_level' => 'warning',    // debug|info|warning|severe|off
+            'db_changelog_dir' => 'db/liquibase',
+            'execute_module_changelogs' => 'true', // execute everything in MODPATH.'module_name/db'
+            'log_level' => 'warning', // debug|info|warning|severe|off
+            'command' => 'liquibase', // shell command to run liquibase
         ),
         /*
          * Stuff ment to be executed just once
@@ -26,6 +27,5 @@ return array(
      * after deploy - sass compile, uglifyjs...
      */
     'after' => array(
-
     ),
 );

@@ -5,6 +5,7 @@
  * @author Mutant Industries ltd. <mutant-industries@hotmail.com>
  */
 abstract class Kohana_Deploy_Database extends Deploy_Task {
+
     use Rollback;
 
     protected $_db_config;
